@@ -2,6 +2,15 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+exports.findUser = async (username) => {
+  const user = await prisma.blogUser.findFirst({
+    where: {
+      username: username,
+    },
+  });
+  return user;
+};
+
 exports.findByUsername = async (username) => {
   const existingUser = await prisma.blogUser.findFirst({
     where: {

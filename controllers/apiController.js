@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 const { body, validationResult } = require("express-validator");
 const prismaQueries = require("../prisma/prismaQueries");
+const jwt = require("jsonwebtoken");
 
 const validateUser = [
   body("username")
@@ -68,3 +69,26 @@ exports.postSignUp = [
     res.json({ message: "You have registered successfully" });
   },
 ];
+
+// if i remember right jwt - 3 steps - sign, verify, getTokenFromHeaderReq
+exports.postLogIn = async (req, res) => {
+  // payload
+  const user = await prismaQueries.findUser(req.body.username);
+  if (!user) {
+    return res.status(404).send("Username not found");
+  } else {
+    const match = await bcrypt.compare(req.body.password, user.password);
+    if (!match) {
+      return res.status(404).send("Wrong Password");
+    } else {
+      jwt.sign(
+        { user },
+        process.env.SECRET_KEY,
+        { expiresIn: "100s" },
+        (err, token) => {
+          return res.json({ token });
+        }
+      );
+    }
+  }
+};
