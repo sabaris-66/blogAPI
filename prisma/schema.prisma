@@ -20,18 +20,18 @@ model BlogUserPost {
   title           String            @db.VarChar(255)
   content         String?
   published       Boolean           @default(false)
-  author          BlogUser          @relation(fields: [authorId], references: [username])
-  authorId        String
+  author          BlogUser?         @relation(fields: [authorId], references: [username])
+  authorId        String?
   BlogUserComment BlogUserComment[]
 }
 
 model BlogUserComment {
-  id      Int          @id @default(autoincrement())
+  id      Int           @id @default(autoincrement())
   comment String?
-  user    BlogUser     @relation(fields: [userId], references: [username])
-  userId  String       @unique
-  post    BlogUserPost @relation(fields: [postId], references: [id])
-  postId  Int          @unique
+  user    BlogUser?     @relation(fields: [userId], references: [username])
+  userId  String?       @unique
+  post    BlogUserPost? @relation(fields: [postId], references: [id])
+  postId  Int?          @unique
 }
 
 model BlogUser {

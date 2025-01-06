@@ -51,7 +51,7 @@ exports.postSignUp = [
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
     //   if no error arises
@@ -66,7 +66,7 @@ exports.postSignUp = [
       }
     });
 
-    res.json({ message: "You have registered successfully" });
+    res.sendStatus(200);
   },
 ];
 
@@ -74,21 +74,155 @@ exports.postSignUp = [
 exports.postLogIn = async (req, res) => {
   // payload
   const user = await prismaQueries.findUser(req.body.username);
+  console.log(user);
   if (!user) {
-    return res.status(404).send("Username not found");
+    return res.sendStatus(400);
   } else {
     const match = await bcrypt.compare(req.body.password, user.password);
     if (!match) {
-      return res.status(404).send("Wrong Password");
+      return res.sendStatus(400);
     } else {
+      console.log("password success");
       jwt.sign(
         { user },
         process.env.SECRET_KEY,
-        { expiresIn: "100s" },
+        { expiresIn: "3600s" },
         (err, token) => {
           return res.json({ token });
         }
       );
     }
   }
+};
+
+exports.check = (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      res.json({
+        message: "api/posts",
+        authData,
+      });
+    }
+  });
+};
+
+exports.getPosts = async (req, res) => {
+  const posts = await prismaQueries.findPosts();
+  return res.json({ posts });
+};
+
+exports.getPublishedPosts = async (req, res) => {
+  const posts = await prismaQueries.findPublishedPosts();
+  return res.json({ posts });
+};
+
+exports.getSpPost = async (req, res) => {
+  let postId = parseInt(req.params.postId);
+  const spPost = await prismaQueries.findPostWithComments(postId);
+  return res.json({ spPost });
+};
+
+exports.postNewBlog = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        await prismaQueries.postNewBlogPost(req.body.title, req.body.content);
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
+};
+
+exports.postNewComment = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        let postId = parseInt(req.params.postId);
+        await prismaQueries.postNewBlogComment(req.body.comment, postId);
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
+};
+
+exports.updateStatus = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        let status = false;
+        let postId = parseInt(req.params.postId);
+        if (req.params.status === "true") {
+          status = true;
+        }
+        await prismaQueries.changePublishedStatus(status, postId);
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
+};
+
+exports.updatePost = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        let postId = parseInt(req.params.postId);
+        await prismaQueries.updatePost(
+          req.body.newTitle,
+          req.body.newContent,
+          postId
+        );
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
+};
+
+exports.deletePost = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        let postId = parseInt(req.params.postId);
+        await prismaQueries.deletePost(postId);
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
+};
+
+exports.deleteComment = async (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.status(403).send("Token Verification Error");
+    } else {
+      try {
+        let commentId = parseInt(req.params.commentId);
+        await prismaQueries.deleteComment(commentId);
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400);
+      }
+    }
+  });
 };

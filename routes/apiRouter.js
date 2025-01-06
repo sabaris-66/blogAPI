@@ -7,18 +7,28 @@ const jwt = require("jsonwebtoken");
 apiRouter.get("/", (req, res) => res.send("api works"));
 apiRouter.post("/signUp", apiController.postSignUp);
 apiRouter.post("/logIn", apiController.postLogIn);
-apiRouter.post("/check", verifyToken, (req, res) => {
-  jwt.verify(req.token, process.env.SECRET_KEY, (err, authData) => {
-    if (err) {
-      res.status(403).send("Token Verification Error");
-    } else {
-      res.json({
-        message: "api/posts",
-        authData,
-      });
-    }
-  });
-});
+// apiRouter.post("/check", verifyToken, apiController.check);
+apiRouter.get("/allPosts", apiController.getPosts);
+apiRouter.get("/posts", verifyToken, apiController.getPublishedPosts);
+apiRouter.get("/posts/:postId", apiController.getSpPost);
+apiRouter.post("/blog", verifyToken, apiController.postNewBlog);
+apiRouter.post(
+  "/posts/:postId/comment",
+  verifyToken,
+  apiController.postNewComment
+);
+apiRouter.put(
+  "/allPosts/:postId/:status",
+  verifyToken,
+  apiController.updateStatus
+);
+apiRouter.put("/allPosts/:postId", verifyToken, apiController.updatePost);
+apiRouter.delete("/allPosts/:postId", verifyToken, apiController.deletePost);
+apiRouter.delete(
+  "/allPosts/:postId/comments/:commentId",
+  verifyToken,
+  apiController.deleteComment
+);
 
 // route protection token
 function verifyToken(req, res, next) {
