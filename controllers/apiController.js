@@ -51,7 +51,7 @@ exports.postSignUp = [
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors });
     }
 
     //   if no error arises
@@ -60,13 +60,12 @@ exports.postSignUp = [
     //password bcrypt and push it into database
     bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
       if (err) {
-        throw new Error(err);
+        return res.sendStatus(400);
       } else {
         await prismaQueries.pushBlogUser(username, email, hashedPassword);
+        return res.sendStatus(200);
       }
     });
-
-    res.sendStatus(200);
   },
 ];
 
@@ -98,9 +97,9 @@ exports.postLogIn = async (req, res) => {
 exports.check = (req, res) => {
   jwt.verify(req.token, process.env.SECRET_KEY, (err, authData) => {
     if (err) {
-      res.status(403).send("Token Verification Error");
+      return res.sendStatus(400);
     } else {
-      res.json({
+      return res.json({
         message: "api/posts",
         authData,
       });
@@ -109,8 +108,14 @@ exports.check = (req, res) => {
 };
 
 exports.getPosts = async (req, res) => {
-  const posts = await prismaQueries.findPosts();
-  return res.json({ posts });
+  jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      const posts = await prismaQueries.findPosts();
+      return res.json({ posts });
+    }
+  });
 };
 
 exports.getPublishedPosts = async (req, res) => {
@@ -140,17 +145,21 @@ exports.postNewBlog = async (req, res) => {
 };
 
 exports.postNewComment = async (req, res) => {
+  try {
+    let postId = parseInt(req.params.postId);
+    await prismaQueries.postNewBlogComment(req.body.comment, postId);
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(400);
+  }
+};
+
+exports.checkTokenValidity = (req, res) => {
   jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
     if (err) {
-      res.status(403).send("Token Verification Error");
+      return res.sendStatus(400);
     } else {
-      try {
-        let postId = parseInt(req.params.postId);
-        await prismaQueries.postNewBlogComment(req.body.comment, postId);
-        return res.sendStatus(200);
-      } catch (error) {
-        return res.sendStatus(400);
-      }
+      return res.status(200).json({ message: "Token still valid" });
     }
   });
 };

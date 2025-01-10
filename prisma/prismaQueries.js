@@ -51,6 +51,7 @@ exports.findPublishedPosts = async () => {
       published: true,
     },
   });
+  return publishedPosts;
 };
 
 // to get the specific posts and their comments
@@ -60,7 +61,7 @@ exports.findPostWithComments = async (id) => {
       id: id,
     },
     include: {
-      BlogUserComment: true,
+      comments: true,
     },
   });
   return post;
@@ -150,6 +151,16 @@ exports.deleteComment = async (commentId) => {
 };
 
 async function main() {
+  // await prisma.blogUserComment.deleteMany();
+  // await prisma.blogUserPost.deleteMany();
+  // await prisma.blogUser.deleteMany();
+  // await prisma.blogUserComment.create({
+  //   data: {
+  //     comment: "blacky black blah blah",
+  //     postId: 11,
+  //   },
+  // });
+
   // await prisma.blogUserPost.deleteMany({
   //   where: {
   //     authorId: "blahblah22",
@@ -181,6 +192,14 @@ async function main() {
   //     username: "lasher55",
   //   },
   // });
+  // await prisma.blogUserPost.updateMany({
+  //   where: {
+  //     authorId: "blahblah22",
+  //   },
+  //   data: {
+  //     published: true,
+  //   },
+  // });
   //   await prisma.blogUser.deleteMany();
   //   const u = await prisma.blogUser.findFirst({
   //     where: {
@@ -193,14 +212,14 @@ async function main() {
   //   });
   //   console.log(u);
   // ... you will write your Prisma Client queries here
-  //   await prisma.blogUser.create({
-  //     data: {
-  //       username: "dd",
-  //       email: "fe#",
-  //       password: "password",
-  //     },
-  //   });
-  const u = await prisma.blogUser.findMany();
+  // await prisma.blogUser.create({
+  //   data: {
+  //     username: "blahblah22",
+  //     email: "fedjd@gmail.com",
+  //     password: "QtPassword@2",
+  //   },
+  // });
+  const u = await prisma.blogUserPost.findMany();
   console.log(u);
 }
 

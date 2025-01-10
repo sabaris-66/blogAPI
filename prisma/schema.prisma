@@ -14,24 +14,24 @@ datasource db {
 }
 
 model BlogUserPost {
-  id              Int               @id @default(autoincrement())
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  title           String            @db.VarChar(255)
-  content         String?
-  published       Boolean           @default(false)
-  author          BlogUser?         @relation(fields: [authorId], references: [username])
-  authorId        String?
-  BlogUserComment BlogUserComment[]
+  id        Int               @id @default(autoincrement())
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  title     String            @db.VarChar(255)
+  content   String?
+  published Boolean           @default(false)
+  author    BlogUser?         @relation(fields: [authorId], references: [username])
+  authorId  String?
+  comments  BlogUserComment[]
 }
 
 model BlogUserComment {
   id      Int           @id @default(autoincrement())
   comment String?
   user    BlogUser?     @relation(fields: [userId], references: [username])
-  userId  String?       @unique
+  userId  String?
   post    BlogUserPost? @relation(fields: [postId], references: [id])
-  postId  Int?          @unique
+  postId  Int?
 }
 
 model BlogUser {

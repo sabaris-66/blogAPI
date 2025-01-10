@@ -4,19 +4,15 @@ const apiRouter = Router();
 const apiController = require("../controllers/apiController");
 const jwt = require("jsonwebtoken");
 
-apiRouter.get("/", (req, res) => res.send("api works"));
+apiRouter.get("/token", verifyToken, apiController.checkTokenValidity);
 apiRouter.post("/signUp", apiController.postSignUp);
 apiRouter.post("/logIn", apiController.postLogIn);
 // apiRouter.post("/check", verifyToken, apiController.check);
-apiRouter.get("/allPosts", apiController.getPosts);
-apiRouter.get("/posts", verifyToken, apiController.getPublishedPosts);
+apiRouter.get("/allPosts", verifyToken, apiController.getPosts);
+apiRouter.get("/posts", apiController.getPublishedPosts);
 apiRouter.get("/posts/:postId", apiController.getSpPost);
 apiRouter.post("/blog", verifyToken, apiController.postNewBlog);
-apiRouter.post(
-  "/posts/:postId/comment",
-  verifyToken,
-  apiController.postNewComment
-);
+apiRouter.post("/posts/:postId/comment", apiController.postNewComment);
 apiRouter.put(
   "/allPosts/:postId/:status",
   verifyToken,
@@ -37,7 +33,7 @@ function verifyToken(req, res, next) {
     req.token = bearerHeader.split(" ")[1];
     next();
   } else {
-    return res.status(400).send("Header - Token Error");
+    return res.sendStatus(400);
   }
 }
 
