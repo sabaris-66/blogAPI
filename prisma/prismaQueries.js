@@ -160,7 +160,6 @@ async function main() {
   //     postId: 11,
   //   },
   // });
-
   // await prisma.blogUserPost.deleteMany({
   //   where: {
   //     authorId: "blahblah22",
@@ -219,8 +218,8 @@ async function main() {
   //     password: "QtPassword@2",
   //   },
   // });
-  const u = await prisma.blogUserPost.findMany();
-  console.log(u);
+  // const u = await prisma.blogUser.findMany();
+  // console.log(u);
 }
 
 main()
