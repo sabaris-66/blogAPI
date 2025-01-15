@@ -157,9 +157,9 @@ exports.postNewComment = async (req, res) => {
 exports.checkTokenValidity = (req, res) => {
   jwt.verify(req.token, process.env.SECRET_KEY, async (err, authData) => {
     if (err) {
-      return res.sendStatus(400);
+      return res.status(400).json({ error: "Token Expired" });
     } else {
-      return res.status(200).json({ message: "Token still valid" });
+      return res.status(200).json({ message: "Valid Token" });
     }
   });
 };
